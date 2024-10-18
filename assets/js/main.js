@@ -1,23 +1,16 @@
 /**************************************************************/
-/*                         Données                            */
+/*                         Données                         */
 /**************************************************************/
 
 
 let divHeader = document.querySelectorAll('header > div');
 let divMain = document.querySelectorAll('main > div > div');
+let colorPickers = document.querySelectorAll('.js-color-picker');
 
-let colorPickers = document.querySelectorAll(".js-color-picker")
-
-
-
-console.log('les div du header', divHeader);
-console.log('les div du main', divMain);
+console.log("les pickers", colorPickers)
 
 
 
-
-// let colorPicker = document.querySelector('js-color-picker')
-// console.log ("color picker",colorPicker.value)
 
 /**************************************************************/
 /*                         Fonctions                            */
@@ -25,93 +18,81 @@ console.log('les div du main', divMain);
 
 
 
-// ________Fonctions pour modifier les couleurs avec le color Picker____________
+// _____Fonction pour loader les couleurs par défaut au chargement de la page___
 
-function getColorWithColorPicker() {
-    // console.log("test fonction add color picker")
-    // console.log("les color pickers", colorPickers)
+function loadPalette(palette) {
 
-    const colorsArray = [];
-    for (let i = 0; i < colorPickers.length; i++) {
-        colorsArray.push(colorPickers[i].value)
-
-    }
-
-    return colorsArray
-
-}
-
-
-
-function applyColorToBoxes(event){
-
-
-    let colorPickerValues = getColorWithColorPicker()
-
-    for (let i = 0; i < colorPickerValues.length; i++) {
-       if (divHeader[i]){
-           divHeader[i].style.backgroundColor = colorPickerValues[i];
-       }
+    for (let i = 0; i < palette.length; i++) {
+        colorPickers[i].value = palette[i];
     }
 }
 
 
+
+
+// ____________________ Fonctions Local Storage _______________________________
 function selectColor(event) {
 
-    // console.log("je clique sur une div header");
+    let colorPalette = event.target;
+    console.log("colorPalette", colorPalette)
 
-    let colorBox = event.target;
-    let color = colorBox.style.backgroundColor;
+    let selectedColor = colorPalette.value; // Récupère la valeur sélectionnée
+    console.log("selected color", selectedColor)
+    sessionStorage.setItem("selectedColor", selectedColor); // Stocke la couleur dans sessionStorage
 
-    sessionStorage.setItem("selectedColor", color);
 }
-
-
 
 function getSelectedColor() {
 
     if (sessionStorage.getItem("selectedColor")) {
         return sessionStorage.getItem("selectedColor");
     }
-
-    return null;
+    return null; // Pourquoi null?
 }
 
 
 
-function loadPalette(palette) {
-    console.log("la fonction loadPalette est appelée")
-    for (let i = 0; i < palette.length; i++) {
-        divHeader[i].style.backgroundColor = palette[i];
-    }
-}
 
+
+
+//_________ Fonction pour charger la couleur choisie dans la palette____________
 
 function loadSelectedColor(event) {
+    localStorage.clear() // à revoir, ne fonctionne pas
+    console.log("je commence à colorier")
+    let cellMain = event.target;
+    let selectedColor = getSelectedColor();
 
-
-    let selectedCell = event.target;
-    let color = getSelectedColor();
-
-
-
-    if (selectedCell.style.backgroundColor) {
-        selectedCell.style.backgroundColor = '';
-
-    }
-    else {
-        selectedCell.style.backgroundColor = color;
-
+    if (MouseDown) {
+        console.log("ok pour le mousedow")
+        cellMain.style.backgroundColor = selectedColor;
     }
 }
 
 
+//___________ Fonctions pour activer et désactiver le coloriage________________
 
-/************************************************************/
-/*                      Event listeners                       */
-/**************************************************************/
+let MouseDown = false
+
+function colorOnCells() {
+    console.log("j'ai la souris enfoncée")
+    MouseDown = true
+    
+
+    divMain.forEach(div => {
+        div.addEventListener("mouseover", loadSelectedColor)
+    })
+}
 
 
+function stopColoring() {
+    MouseDown = false
+    console.log("je stoppe")
+
+    divMain.forEach(div => {
+        div.removeEventListener("mouseover", loadSelectedColor(event)) 
+    })
+}
 
 
 
@@ -124,30 +105,45 @@ function loadSelectedColor(event) {
 
 
 window.addEventListener("DOMContentLoaded", function() {
-    loadPalette(["#22f6f3", "#3daf7e", "#ffffff", "#ec8236", "#a9a7ee", "#ecc606", "#f783f2", "#e89e80", "#000000", "#8b4513", "#0000ff", "#800080", "#ff0000", "#ffdead", "#808080", "#ff6347"])
-    //  )
-    ;
 
-    divHeader.forEach(div => {
-        div.addEventListener('click', selectColor)
+    loadPalette([
+        "#22f6f3",
+        "#3daf7e",
+        "#ffffff",
+        "#ec8236",
+        "#a9a7ee",
+        "#ecc606",
+        "#f783f2",
+        "#e89e80",
+        "#000000",
+        "#8b4513",
+        "#0000ff",
+        "#800080",
+        "#ff0000",
+        "#ffdead",
+        "#808080",
+        "#ff6347"
+    ]);
+
+
+
+    colorPickers.forEach(input => {
+        input.addEventListener('input', selectColor)
     })
 
 
 
-    divMain.forEach(cell => {
-        cell.addEventListener('click', loadSelectedColor)
-    })
-
-    // le code de l'étape 2 se passe ici
-
-    // le code de l'étape 3 se passe ici
+    document.addEventListener("mousedown", colorOnCells);
+    document.addEventListener("mouseup", stopColoring);
 
 
-    getColorWithColorPicker()
+eraserButton.addEventListener()// à continuer
 
-    colorPickers.forEach(picker => {
-        picker.addEventListener("input", applyColorToBoxes)
-    })
-
+// A faire : 
+// changer la taille de la grille
+// enregistrer au format PNG
+// + css
+// idée : bouton image gomme avec bordure en surbrillance quand on clique dessus
+// + bouton clear
 
 });
